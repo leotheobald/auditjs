@@ -2,38 +2,23 @@
 <html>
   <head>
     <title>DOGUS Audit js</title>
-    <script type="text/javascript" src="crawler.js"></script>
-
     <script type="text/javascript">
 
-      function postData(){
-        var pages = document.getElementById('webaddress').value;
-        var pagecount = document.getElementById('pagecount').value;
+    function getData() {
+      var xhttp = new XMLHttpRequest();
+      //console.log('getdta Access-Control-Allow-Headers');
+      xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+          document.getElementById("response").innerHTML =  this.responseText;
+          console.log(this.responseText);
+        }
+      };
+      let url = "http://localhost:8095/getData?webAddress=" + document.getElementById('webaddress').value + '&pageCount=' + document.getElementById('pagecount').value;
+      console.log('utl', url);
+      xhttp.open("GET", url, true);
+      xhttp.send();
+    }
 
-        alert(pages)
-      }
-
-      // window.addEventListener("load", function() {
-      //   function getData() {
-      //     var formData = new FormData(form);
-
-      //     for (var pair of formData.entries()) {
-      //       console.log("Form fields: ", pair[0] + ': ' + pair[1]);
-      //     }
-      //   }
-
-      //   var form = document.getElementById("auditJs");
-
-      //   form.addEventListener("submit", function(event) {
-      //     event.preventDefault();
-      //     getData();
-      //   });
-      // });
-
-      // function myFunction() {
-      //   var x = document.getElementById("myForm").elements[0].value;
-      //   document.getElementById("demo").innerHTML = x;
-      // }
     </script>
 
     <style>
@@ -179,14 +164,16 @@
     </style>
   </head>
   <body>
+    <div>response: <pre id="response"></pre>
+      <button onClick="getData()">Get data</button>
     <div class="container">
       <h1>DOGUS audit Javascript, inline and sourced.</h1>
-      
+
       <!-- data in collapsed state for ease of access. -->
-      <form id="auditJs" method="post" action="crawler.js">
+      <form id="auditJs" method="post">
         <div>
           <label for="webaddress">Web address</label>
-          <input id="webaddress" type="text" name="webaddress" />
+          <input id="webaddress" type="text" name="webaddress">
           <label for="pagecount">Page count</label>
           <input id="pagecount" type="number" name="pagecount" />
           <input type="submit" onclick="postData()" value="Submit" />
