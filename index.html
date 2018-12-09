@@ -20,151 +20,10 @@
     }
 
     </script>
-
-    <style>
-      :root {
-        --yellow1: rgba(250, 224, 66, .2);
-        --yellow3: #FAE042;
-        --brown1: #A77B0E;
-        --brown2: #7C5A0B;
-        --fonts-text: Helvetica, sans-serif;
-        --fonts-code: monospace;
-      }
-
-      .container {
-        width: 80%;
-        margin: 0 auto;
-      }
-
-      .container h1,
-      .container form {
-        font-family: var(--fonts-text);
-      }
-
-      .wrap-collabsible {
-        margin-bottom: 1.2rem 0;
-      }
-
-      input[type='checkbox'] {
-        display: none;
-      }
-
-      .lbl-toggle {
-        display: block;
-
-        font-weight: bold;
-        font-family: var(--fonts-code);
-        font-size: 1.2rem;
-        text-transform: uppercase;
-        text-align: center;
-
-        padding: 1rem;
-
-        color: var(--brown1);
-        background: var(--yellow3);
-
-        cursor: pointer;
-
-        border-radius: 7px;
-        transition: all 0.25s ease-out;
-      }
-
-      .lbl-toggle:focus {
-         outline: none 0;
-      }
-
-      .lbl-toggle:hover {
-        color: var(--brown2);
-      }
-
-      .lbl-toggle::before {
-        content: ' ';
-        display: inline-block;
-
-        border-top: 5px solid transparent;
-        border-bottom: 5px solid transparent;
-        border-left: 5px solid currentColor;
-        vertical-align: middle;
-        margin-right: .7rem;
-        transform: translateY(-2px);
-
-        transition: transform .2s ease-out;
-      }
-
-      .toggle:checked + .lbl-toggle::before {
-        transform: rotate(90deg) translateX(-3px);
-      }
-
-      .collapsible-content {
-        max-height: 0px;
-        overflow: hidden;
-        transition: max-height .25s ease-in-out;
-      }
-
-      .toggle:checked + .lbl-toggle + .collapsible-content {
-        max-height: 350px;
-      }
-
-      .toggle:checked + .lbl-toggle {
-        border-bottom-right-radius: 0;
-        border-bottom-left-radius: 0;
-      }
-
-      .collapsible-content .content-inner {
-        background: var(--yellow1);
-        border-bottom: 1px solid rgba(250, 224, 66, .45);
-        border-bottom-left-radius: 7px;
-        border-bottom-right-radius: 7px;
-        padding: .5rem 1rem;
-      }
-
-      .content-inner p {
-        font-size: 22px;
-        font-family: var(--fonts-text);
-        word-break: normal;
-        hyphens: auto;
-
-        margin-top: 1.2em;
-        margin-bottom: 1em;
-      }
-      .content-inner .pages-crawled {
-        border-left: 4px solid var(--yellow3);
-        padding-left: .8em;
-
-        font-family: var(--fonts-code);
-        word-break: normal;
-        hyphens: auto;
-
-        margin-top: 1.2em;
-        margin-bottom: 1em;
-      }
-      .pages-crawled th,
-      .pages-crawled td {
-        text-align: left;
-      }
-      .pages-crawled th:first-of-type,
-      .pages-crawled td:first-of-type {
-        width: 20%;
-      }
-      .pages-crawled th:nth-of-type(2),
-      .pages-crawled td:nth-of-type(2) {
-        width: 70%;
-      }
-
-      .container form label {
-        margin-bottom: 1rem;
-        width: 100px;
-        display: inline-block;
-      }
-
-      .container form input {
-        margin-right: 1rem;
-      }
-
-    </style>
+    <link rel="stylesheet" type="text/css" src="css/main.css">
   </head>
   <body>
-    <div>response: <pre id="response"></pre>
+    <div>response from server: <pre id="response"></pre>
       <button onClick="getData()">Get data</button>
     <div class="container">
       <h1>DOGUS audit Javascript, inline and sourced.</h1>
@@ -179,7 +38,9 @@
           <input type="submit" onclick="postData()" value="Submit" />
         </div>
       </form>
+      <!-- // End #auditjs -->
       <br /><br />
+      <!-- Begin .wrap-collapsible loop for data returned -->
       <div class="wrap-collabsible">
         <input id="collapsible" class="toggle" type="checkbox">
         <label for="collapsible" class="lbl-toggle" tabindex="0">Page url crawled display here</label>
@@ -190,7 +51,6 @@
             </p>
 
             <table class="pages-crawled">
-
               <thead>
                 <tr>
                   <th>Type</th>
@@ -207,21 +67,12 @@
                   <td>[G]</td>
                   <td>[U]</td>
                 </tr>
-
-                <!-- <tr>
-                  <td>Script: </td>
-                  <td><code>long list of scripts to display here...</code></td>
-                  <td>[G]</td>
-                  <td>[U]</td>
-                </tr>-->
-
               </tbody>
-
             </table>
 
           </div>
         </div>
-      </div>
+      </div><!-- // End .wrap-collapsible loop for data returned -->
 
     </div><!-- // End .container -->
   </body>
