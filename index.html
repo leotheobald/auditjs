@@ -13,27 +13,27 @@
         alert(pages)
       }
 
-      // window.addEventListener("load", function() {
-      //   function getData() {
-      //     var formData = new FormData(form);
+      /*window.addEventListener("load", function() {
+        function getData() {
+          var formData = new FormData(form);
 
-      //     for (var pair of formData.entries()) {
-      //       console.log("Form fields: ", pair[0] + ': ' + pair[1]);
-      //     }
-      //   }
+          for (var pair of formData.entries()) {
+            console.log("Form fields: ", pair[0] + ': ' + pair[1]);
+          }
+        }
 
-      //   var form = document.getElementById("auditJs");
+        var form = document.getElementById("auditJs");
 
-      //   form.addEventListener("submit", function(event) {
-      //     event.preventDefault();
-      //     getData();
-      //   });
-      // });
+        form.addEventListener("submit", function(event) {
+          event.preventDefault();
+          getData();
+        });
+      });
 
-      // function myFunction() {
-      //   var x = document.getElementById("myForm").elements[0].value;
-      //   document.getElementById("demo").innerHTML = x;
-      // }
+      function myFunction() {
+        var x = document.getElementById("myForm").elements[0].value;
+        document.getElementById("demo").innerHTML = x;
+      }*/
     </script>
 
     <style>
@@ -182,8 +182,8 @@
     <div class="container">
       <h1>DOGUS audit Javascript, inline and sourced.</h1>
       
-      <!-- data in collapsed state for ease of access. -->
-      <form id="auditJs" method="post" action="crawler.js">
+      <!-- #auditjs -->
+      <form id="auditjs" method="post" action="crawler.js">
         <div>
           <label for="webaddress">Web address</label>
           <input id="webaddress" type="text" name="webaddress" />
@@ -192,7 +192,9 @@
           <input type="submit" onclick="postData()" value="Submit" />
         </div>
       </form>
+      <!-- // End #auditjs -->
       <br /><br />
+      <!-- Begin .wrap-collapsible data returned -->
       <div class="wrap-collabsible">
         <input id="collapsible" class="toggle" type="checkbox">
         <label for="collapsible" class="lbl-toggle" tabindex="0">Page url crawled display here</label>
@@ -234,7 +236,7 @@
 
           </div>
         </div>
-      </div>
+      </div><!-- // End .wrap-collapsible data returned -->
 
     </div><!-- // End .container -->
   </body>
