@@ -1,6 +1,7 @@
-/* css */
-
-\:root {
+.test {
+  direction: ltr;
+}
+:root {
   --yellow1: rgba(250, 224, 66, .2);
   --yellow3: #FAE042;
   --brown1: #A77B0E;
@@ -112,3 +113,4 @@ input[type='checkbox'] {
   font-family: var(--fonts-code);
   word-break: normal;
   hyphens: auto;
+}

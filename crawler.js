@@ -18,6 +18,9 @@ var pagesToVisit = [];
 var url = new URL(START_URL);
 var baseUrl = url.protocol + "//" + url.hostname;
 
+// if () {
+  
+// }
 pagesToVisit.push(START_URL);
 crawl();
 
