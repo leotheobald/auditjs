@@ -10,12 +10,12 @@ var cheerio = require('cheerio');
 var URL = require('url-parse');
 
 
-// body parse thing
+// body parse thing, dont worry it globally works when bad strings turn up
 const bodyParser = require('body-parser');
 app.use( bodyParser.json() );       // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({extended: true}));     // to support URL-encoded bodies
 
-
+// always send all these headers from yr server, your browser will need them
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Content-Type", "text/json; charset=utf-8");
@@ -23,41 +23,42 @@ app.use(function(req, res, next) {
   next();
 });
 
-const server = app.listen(8095, function () {
-  const host = server.address();
-  const port = server.address().port;
-  // 82.31.145.132
-  console.log("TurdServer listening at http://localhost:" + port);
-  console.log("TurdServer listening at http://127.0.0.1:" +  port);
-
-});
-
-var START_URL = "http://denofgeekus.vm.didev.co.uk/";
+// GO
+//var START_URL = "http://denofgeekus.vm.didev.co.uk/";
 var MAX_PAGES_TO_VISIT = 1;
 
 var pagesVisited = {};
 var numPagesVisited = 0;
 var pagesToVisit = [];
-var url = new URL(START_URL);
-var baseUrl = url.protocol + "//" + url.hostname;
+let url; // = new URL(START_URL);Fprto
+//var baseUrl = url.protocol + "//" + url.hostname;
 
+// fire up a web server
+const server = app.listen(8095, function () {
+  //
+});
 
-//pagesToVisit.push(START_URL);
-
+// will respond to any posts or gets to http://localhost:8095/getData
+// when you call this address a json will be sent back.
+// req is the url params you sent/ the res is what you send back
 app.get('/getData', function (req, res) {
 
-  // incoming queryString
-
+  // incoming queryString for getData should be ?webAddress=http://someUrl&pageCount=1
+  // get the values posted in from 8082
   const webAddress = req.query.webAddress;
   const pageCount = req.query.pageCount;
+  console.log('server Recieved: webAddress', webAddress, 'pageCount',  pageCount);
+  // TODO check they re valid!
+
+  // add the webAddress to list of pages to scrape
   pagesToVisit.push(webAddress);
-  //let data = crawl();
 
-  console.log('webAddress', webAddress, pagesToVisit);
-  console.log('pagesToVisit',  pagesToVisit);
+  // get the return from the crawl() function
+  let data = crawl(); // should be an object with data
 
+  console.log('crawl data ', data);
 
-   const data = {test: 'stuff'};
+   //data = {test: 'stuff'};
    res.end(JSON.stringify(data));
 });
 
