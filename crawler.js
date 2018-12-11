@@ -1,4 +1,5 @@
 console.log('page load');
+
 var express = require('express');
 var app = express();
 var fs = require("fs");
@@ -56,10 +57,12 @@ app.get('/getData', function (req, res) {
   // get the return from the crawl() function
   let data = crawl(); // should be an object with data
 
-  console.log('crawl data ', data);
+  //console.log('crawl data ', data);
 
-   //data = {test: 'stuff'};
-   res.end(JSON.stringify(data));
+  //data = {test: 'stuff'};
+  res.end(JSON.stringify(data));
+
+  console.log('crawl data ', data);
 });
 
 
@@ -123,18 +126,35 @@ function visitPage(url, callback) {
 function collectInternalLinks($) {
   var relativeLinks = $("a[href^='/']");
 
-  //console.log("Found " + relativeLinks.length + " relative links on page");
+  console.log("Found " + relativeLinks.length + " relative links on page");
   relativeLinks.each(function() {
 
     //console.log("Links: " + "\n" + $(this).attr('href'));
-    pagesToVisit.push(baseUrl + $(this).attr('href'));
+    pagesToVisit.push(url + $(this).attr('href'));
 
   });
 
-  return pagesToVisit ;
+  //console.log("Links: " + relativeLinks);
+
+  return relativeLinks ;
 }
 
 // Lets collect the script tags in the current page.
 function createListOfScripts($) {
-  return $("script");
+
+  var relativeScripts = $("script");
+
+  console.log("Found " + relativeScripts.length + " relative scripts on page");
+  relativeScripts.each(function() {
+
+    console.log("Scripts: " + "\n" + $(this));
+    pagesToVisit.push($(this));
+
+  });
+  
+  //console.log("Scripts: " + relativeScripts);
+
+  return relativeScripts ;
+
+  //return $("script") ; 
 };

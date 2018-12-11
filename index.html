@@ -16,11 +16,11 @@
       xhttp.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
           document.getElementById("response").innerHTML =  this.responseText;
-          console.log(this.responseText);
+          console.log("Response: ", this.responseText);
         }
       };
       let url = "http://localhost:8095/getData?webAddress=" + document.getElementById('webaddress').value + '&pageCount=' + document.getElementById('pagecount').value;
-      console.log('utl', url);
+      console.log('URL', url);
       xhttp.open("GET", url, true);
       xhttp.send();
     }
@@ -29,7 +29,7 @@
     <link rel="stylesheet" type="text/css" src="css/main.css">
   </head>
   <body>
-    <div>response from server: <pre id="response"></pre>
+    <div>response from server: <pre id="response"></pre></div>
       <button onClick="getData()">Get data</button>
     <div class="container">
       <h1>DOGUS audit Javascript, inline and sourced.</h1>
