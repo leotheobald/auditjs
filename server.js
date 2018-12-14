@@ -50,51 +50,34 @@ app.get('/', function (req, res) {
 // will respond to any request to http://localhost:PORT/getData?url=https://www.ibm.com&limit=3
 app.get('/getData', function (req, res) {
 
-  const webAddress = req.query.url;
-  const pageCount = req.query.limit;
+  const url = req.query.url;
+  const limit = req.query.limit;
   console.log('server Recieved: query=', req.query);
   // TODO check they re valid!
 
-  const html = api.getPage(webAddress);
-  let errors = [];
-  let scripts = [];
-  let links = [];
-  //console.log('html', html);
-
-  // Parse the document body
-  //var $ = cheerio.load(html);
-
-  // add the webAddress to list of pages to scrape
-  //pagesToVisit.push(webAddress);
-
-  // get the return from the crawl() function
-  //let data = crawl(); // should be an object with data
-
-  //console.log('crawl data ', data);
-  // build a consistant json to send back
-  let out = {
-    errors: errors
-    query: req.query,
-    links: {},
-    scripts: {},
-    html: html
-  };
-
-   res.end(JSON.stringify(out));
+  // pass res in so we can res.end and send the data after async call to the page
+  api.getPage(url, limit, res);
+   //res.end(JSON.stringify(out)); // not deeded anymore we call it after the async call
 });
 
-
-
 let api = {
-  getPage: (url) => {
+  getPage: (url, limit, res) => {
     request(url, function(error, response, body) {
-      console.log('getPage response', error, response.statusCode);
-
       if(response && response.statusCode === 200) {
        const $ = cheerio.load(body);
        let links = api.getLinks($);
+       let scripts = api.getScripts($);
+       let out = {links: links, scripts: scripts, errors: []};
+       console.log('OK 200: sending: links=', links.length + ' scripts=' + scripts.length);
+       res.end(JSON.stringify(out));
      } else {
-        console.log('Error not 200', error);
+       console.log('getPage Error not 200', error);
+       let response = {
+         errors: [error, url, 'api.getpage'],
+         links: [],
+         scripts: []
+       };
+       res.end(JSON.stringify(response));
      }
     });
   },
@@ -103,8 +86,7 @@ let api = {
     let pagesToVisit = [];
     relativeLinks.each(function() {
       //console.log("Links: " + "\n" + $(this).attr('href'));
-      // make a distinct list - no duplicates
-      pagesToVisit.push({$(this).attr('href'): $(this).attr('href')});
+      pagesToVisit.push($(this).attr('href'));
     });
     return pagesToVisit;
   },
@@ -112,11 +94,12 @@ let api = {
     const scripts =  $("script");
     let scriptLinks = [];
     scripts.each(function() {
-      // make a distinct list - no duplicates
-      scriptLinks.push({$(this).attr('src'): $(this).attr('src')});
+      if($(this).attr('src')) {
+        scriptLinks.push($(this).attr('src'));
+      } else {
+        scriptLinks.push('inline script: ' + $(this).toString().length + ' chars');
+      }
     });
     return scriptLinks;
-
-  };
-
+  }
 };

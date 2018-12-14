@@ -2,11 +2,7 @@
 <html>
   <head>
     <title>DOGUS Audit js</title>
-    <link rel="stylesheet" href="css/main.css">
-
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-
-
     <script type="text/javascript">
     'use strict';
 
@@ -14,19 +10,25 @@
       config: {
         urlId: 'url',
         limitId: 'limit',
-        adminMessagesId: 'adminMessages'
+        adminId: 'adminList',
+        linksId: 'linksList',
+        scriptsId: 'scriptsList',
+        linksCountId: 'linksCount',
+        scriptsCountId: 'scriptsCount'
       },
       buildUrl: () => {
-        let url =  document.getElementById(api.config.urlId).value;
-        let limit =  document.getElementById(api.config.limitId).value;
+        let url =  api.getFormValue(api.config.urlId);
+        let limit =  api.getFormValue(api.config.limitId);
         let urlOut = 'http://localhost:8082/getData/?url=' + url + '&limit=' + limit;
-        console.log('url/limit', urlOut);
         return urlOut;
+      },
+      getFormValue: (id) => {
+        return document.getElementById(id).value;
       },
       getPageData: () => {
 
           let url =  api.buildUrl();
-          api.addMessage('Ajax sent to : ' + url);
+          api.addMessage(api.config.adminId, 'Ajax request sent to : ' + url);
           axios({
             method:'get',
             url: url,
@@ -34,36 +36,50 @@
           })
           .then(function (response) {
             if(response.status === 200){
-              console.log('Success 200',response.data);
-              let html = response.data;
-              api.addMessage('Ajax Success: Success loadedUrl: ' + url);
+              let links = response.data.links;
+              let scripts = response.data.scripts;
+
+              api.addMessage(api.config.adminId, 'Ajax response links=' + links.length + ' scripts=' + scripts.length);
+              api.addMessages(api.config.scriptsId, scripts);
+              api.addMessages(api.config.linksId, links);
+              
+              document.getElementById(api.config.linksCountId).innerHTML = links.length;
+              document.getElementById(api.config.scriptsCountId).innerHTML = scripts.length;
+
             } else {
-              console.log('getPage called err: ', response);
-              api.addMessage('Err not 200: ' + response.status);
+              api.addMessage(api.config.adminId, 'Ajax response Error: ' + response.status);
             }
           })
           .catch(function (error) {
-            console.log('x err',error);
+              api.addMessage(api.config.adminId, 'Ajax response catch Error: ' + error);
           });
       },
-      addMessage: (message) => {
-        document.getElementById(api.config.adminMessagesId).innerHTML += '<li>' + message +'</li>';
+      addMessages: (id, messages) => {
+        for(var i = 0; i < messages.length; i++) {
+          api.addMessage(id, messages[i]);
+        }
+      },
+      addMessage: (id, message) => {
+        document.getElementById(id).innerHTML += '<li>' + message +'</li>';
       }
-
     };
-
-  //  console.log('config', api.config);
-
-
     </script>
   </head>
-  <body>
-      <form name="control">
-          <input id="url" style="width:500px" value="https://www.ibm.com" type="text">
-          <input id="limit" value="3" type="number">
+  <body style="font-family: Verdana;">
+      <input id="url" style="width:500px" value="https://www.w3schools.com/" type="text">
+      <input id="limit" value="3" type="number">
 
-          <input type="button" onClick="api.getPageData()" value="getPageData">
-      </form>
-      <ul id="adminMessages"></ul>
+      <input type="button" onClick="api.getPageData()" value="getPageData">
+
+      <ul id="adminList">Admin</ul>
+
+      <ul id="linksList" style="display: inline-block; width:500px; border:1px solid blue; vertical-align: top">
+        <span id="linksCount"></span> Links
+      </ul>
+
+      <ul id="scriptsList" style="display: inline-block; width:500px;border:1px solid green; vertical-align: top; margin-left:50px;">
+        <span id="scriptsCount"></span> Scripts
+      </ul>
+
   </body>
 </html>
