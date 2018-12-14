@@ -91,23 +91,11 @@ let api = {
       console.log('getPage response', error, response.statusCode);
 
       if(response && response.statusCode === 200) {
-       //let x = api.parseLinks(body);
        const $ = cheerio.load(body);
-       //console.log('x',x);
        let links = api.getLinks($);
      } else {
         console.log('Error not 200', error);
      }
-      // Parse the document body
-
-
-      //let pagesToVisit = collectInternalLinks($);
-      //let scripts = createListOfScripts($);
-
-      // In this short program, our callback is just calling crawl()
-    //  callback();
-
-      //return {pagesToVisit: pagesToVisit, scripts: scripts} ;
     });
   },
   getLinks: ($) => {
@@ -115,10 +103,20 @@ let api = {
     let pagesToVisit = [];
     relativeLinks.each(function() {
       //console.log("Links: " + "\n" + $(this).attr('href'));
-      // make a distink list - no duplicates
+      // make a distinct list - no duplicates
       pagesToVisit.push({$(this).attr('href'): $(this).attr('href')});
     });
     return pagesToVisit;
-  }
+  },
+  getScripts: ($) => {
+    const scripts =  $("script");
+    let scriptLinks = [];
+    scripts.each(function() {
+      // make a distinct list - no duplicates
+      scriptLinks.push({$(this).attr('src'): $(this).attr('src')});
+    });
+    return scriptLinks;
+
+  };
 
 };
