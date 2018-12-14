@@ -2,84 +2,65 @@
 <html>
   <head>
     <title>DOGUS Audit js</title>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
     <script type="text/javascript">
-    //var request = require('./node_modules/request/index.js');
-    //var cheerio = require('cheerio');
-    //var URL = require('./node_modules/url-parse');
+    'use strict';
 
-    //var url = new URL('https://www.google.co.uk/search?q=car+insurance&oq=car+insurance&aqs=chrome..69i57j0l5.4092j0j7&client=ubuntu&sourceid=chrome&ie=UTF-8');
-    //console.log('url', url);
+    let api = {
+      config: {
+        urlId: 'url',
+        limitId: 'limit',
+        adminMessagesId: 'adminMessages'
+      },
+      buildUrl: () => {
+        let url =  document.getElementById(api.config.urlId).value;
+        let limit =  document.getElementById(api.config.limitId).value;
+        let urlOut = 'http://localhost:8082/getData/?url=' + url + '&limit=' + limit;
+        console.log('url/limit', urlOut);
+        return urlOut;
+      },
+      getPageData: () => {
 
-    function getData() {
-      var xhttp = new XMLHttpRequest();
-      //console.log('getdta Access-Control-Allow-Headers');
-      xhttp.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
-          document.getElementById("response").innerHTML =  this.responseText;
-          console.log(this.responseText);
-        }
-      };
-      let url = "http://localhost:8095/getData?webAddress=" + document.getElementById('webaddress').value + '&pageCount=' + document.getElementById('pagecount').value;
-      console.log('utl', url);
-      xhttp.open("GET", url, true);
-      xhttp.send();
-    }
+          let url =  api.buildUrl();
+          api.addMessage('Ajax sent to : ' + url);
+          axios({
+            method:'get',
+            url: url,
+            responseType:'json'
+          })
+          .then(function (response) {
+            if(response.status === 200){
+              console.log('Success 200',response.data);
+              let html = response.data;
+              api.addMessage('Ajax Success: Success loadedUrl: ' + url);
+            } else {
+              console.log('getPage called err: ', response);
+              api.addMessage('Err not 200: ' + response.status);
+            }
+          })
+          .catch(function (error) {
+            console.log('x err',error);
+          });
+      },
+      addMessage: (message) => {
+        document.getElementById(api.config.adminMessagesId).innerHTML += '<li>' + message +'</li>';
+      }
+
+    };
+
+  //  console.log('config', api.config);
+
 
     </script>
-    <link rel="stylesheet" type="text/css" src="css/main.css">
   </head>
   <body>
-    <div>response from server: <pre id="response"></pre>
-      <button onClick="getData()">Get data</button>
-    <div class="container">
-      <h1>DOGUS audit Javascript, inline and sourced.</h1>
+      <form name="control">
+          <input id="url" style="width:500px" value="https://www.ibm.com" type="text">
+          <input id="limit" value="3" type="number">
 
-      <!-- data in collapsed state for ease of access. -->
-      <form id="auditJs" method="post">
-        <div>
-          <label for="webaddress">Web address</label>
-          <input id="webaddress" type="text" name="webaddress">
-          <label for="pagecount">Page count</label>
-          <input id="pagecount" type="number" name="pagecount" />
-          <input type="submit" onclick="postData()" value="Submit" />
-        </div>
+          <input type="button" onClick="api.getPageData()" value="getPageData">
       </form>
-      <!-- // End #auditjs -->
-      <br /><br />
-      <!-- Begin .wrap-collapsible loop for data returned -->
-      <div class="wrap-collabsible">
-        <input id="collapsible" class="toggle" type="checkbox">
-        <label for="collapsible" class="lbl-toggle" tabindex="0">Page url crawled display here</label>
-        <div class="collapsible-content">
-          <div class="content-inner">
-            <p>
-              Below is a list of scripts inline and from source, listed as they are loaded into this page.
-            </p>
-
-            <table class="pages-crawled">
-              <thead>
-                <tr>
-                  <th>Type</th>
-                  <th>Actual src or inline code</th>
-                  <th>Global</th>
-                  <th>Unique</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                <tr>
-                  <td>Script: </td>
-                  <td><code>long list of scripts to display here...</code></td>
-                  <td>[G]</td>
-                  <td>[U]</td>
-                </tr>
-              </tbody>
-            </table>
-
-          </div>
-        </div>
-      </div><!-- // End .wrap-collapsible loop for data returned -->
-
-    </div><!-- // End .container -->
+      <ul id="adminMessages"></ul>
   </body>
 </html>
