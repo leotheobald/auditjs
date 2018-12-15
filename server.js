@@ -31,7 +31,7 @@ app.use(bodyParser.urlencoded({extended: true}));     // to support URL-encoded 
 
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
-  res.header("Content-Type", "text/json; charset=utf-8");
+  res.header("Content-Type", "text/html; charset=utf-8");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Accept");
   next();
 });
@@ -44,6 +44,12 @@ const server = app.listen(PORT, function () {
 app.get('/', function (req, res) {
   const html = fs.readFileSync('./index.html');
   res.header("Content-Type", "text/html; charset=utf-8");
+  res.end(html);
+});
+app.get('/css/styles.css', function (req, res) {
+  const html = fs.readFileSync('./css/styles.css');
+  res.header("Content-Type", "text/css; charset=utf-8");
+  console.log('styles');
   res.end(html);
 });
 
