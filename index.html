@@ -1,85 +1,100 @@
 <!DOCTYPE html>
-<html>
+<html lang="en-US">
   <head>
     <title>DOGUS Audit js</title>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <link type="text/css" rel="stylesheet" href="/css/styles.css">
     <script type="text/javascript">
-    //var request = require('./node_modules/request/index.js');
-    //var cheerio = require('cheerio');
-    //var URL = require('./node_modules/url-parse');
+    'use strict';
 
-    //var url = new URL('https://www.google.co.uk/search?q=car+insurance&oq=car+insurance&aqs=chrome..69i57j0l5.4092j0j7&client=ubuntu&sourceid=chrome&ie=UTF-8');
-    //console.log('url', url);
+    // lets create a new app called api you could call it bob
+    let api = {
+      // api.config is a simple map to the html id
+      config: {
+        urlId: 'url',
+        urlPlusId: 'urlPlus',
+        limitId: 'limit',
+        adminId: 'adminList',
+        linksId: 'linksList',
+        scriptsId: 'scriptsList',
+        linksCountId: 'linksCount',
+        scriptsCountId: 'scriptsCount'
+      },
+      buildUrl: () => {
+        // read the html input fields and return a url to scrape
+        let url =  api.getFormValue(api.config.urlId);
+        url +=  api.getFormValue(api.config.urlPlusId); // we add the plus input to the url
+        let limit =  api.getFormValue(api.config.limitId);
+        let urlOut = 'http://localhost:8082/getData/?url=' + url + '&limit=' + limit;
+        return urlOut;
+      },
+      getFormValue: (id) => {
+        // simply gets an input value
+        return document.getElementById(id).value;
+      },
+      getPageData: () => {
 
-    function getData() {
-      var xhttp = new XMLHttpRequest();
-      //console.log('getdta Access-Control-Allow-Headers');
-      xhttp.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
-          document.getElementById("response").innerHTML =  this.responseText;
-          console.log("Response: ", this.responseText);
+          let url =  api.buildUrl();
+          api.addMessages(api.config.adminId, ['Ajax request sent to : ' + url]);
+          axios({
+            method:'get',
+            url: url,
+            responseType:'json'
+          })
+          .then(function (response) {
+            if(response.status === 200){
+              let links = response.data.links; // array
+              let scripts = response.data.scripts; // array
+              let adminMsg = ['Ajax response links=' + links.length + ' scripts=' + scripts.length];
+
+              api.addMessages(api.config.adminId, adminMsg, false);
+              api.addMessages(api.config.linksId, links, true); // will add a link
+              api.addMessages(api.config.scriptsId, scripts, false);
+
+              document.getElementById(api.config.linksCountId).innerHTML = links.length;
+              document.getElementById(api.config.scriptsCountId).innerHTML = scripts.length;
+
+            } else {
+              api.addMessages(api.config.adminId, ['Ajax response Error: ' + response.status]);
+            }
+          })
+          .catch(function (error) {
+              api.addMessages(api.config.adminId, ['Ajax response catch Error: ' + error]);
+          });
+      },
+      addMessages: (id, messages, link = false) => {
+        for(var i = 0; i < messages.length; i++) {
+          if(link) {
+            let msg =  messages[i];
+            messages[i] = '<a onClick="api.updateUrlPlus(this.innerHTML)" href="#">' + msg + '</a>';
+          }
+          document.getElementById(id).innerHTML += '<li>' + messages[i] +'</li>';
         }
-      };
-      let url = "http://localhost:8095/getData?webAddress=" + document.getElementById('webaddress').value + '&pageCount=' + document.getElementById('pagecount').value;
-      console.log('URL', url);
-      xhttp.open("GET", url, true);
-      xhttp.send();
-    }
-
+      },
+      updateUrlPlus: (urlPlus) => {
+        // callback to add the clicked item to the url plus input and search new page
+        console.log('urlPlus', urlPlus);
+        document.getElementById(api.config.urlPlusId).value = urlPlus;
+      }
+    };
     </script>
-    <link rel="stylesheet" type="text/css" src="css/main.css">
   </head>
-  <body>
-    <div>response from server: <pre id="response"></pre></div>
-      <button onClick="getData()">Get data</button>
-    <div class="container">
-      <h1>DOGUS audit Javascript, inline and sourced.</h1>
+  <body style="font-family: Verdana;">
+      <input id="url" style="width:250px" value="https://www.w3schools.com" type="text">
+      <input id="urlPlus" style="width:150px" value="" type="text">
+      <input id="limit" style="width:30px" value="3" type="number">
 
-      <!-- data in collapsed state for ease of access. -->
-      <form id="auditJs" method="post">
-        <div>
-          <label for="webaddress">Web address</label>
-          <input id="webaddress" type="text" name="webaddress">
-          <label for="pagecount">Page count</label>
-          <input id="pagecount" type="number" name="pagecount" />
-          <input type="submit" onclick="postData()" value="Submit" />
-        </div>
-      </form>
-      <!-- // End #auditjs -->
-      <br /><br />
-      <!-- Begin .wrap-collapsible loop for data returned -->
-      <div class="wrap-collabsible">
-        <input id="collapsible" class="toggle" type="checkbox">
-        <label for="collapsible" class="lbl-toggle" tabindex="0">Page url crawled display here</label>
-        <div class="collapsible-content">
-          <div class="content-inner">
-            <p>
-              Below is a list of scripts inline and from source, listed as they are loaded into this page.
-            </p>
+      <input type="button" onClick="api.getPageData()" value="getPageData">
 
-            <table class="pages-crawled">
-              <thead>
-                <tr>
-                  <th>Type</th>
-                  <th>Actual src or inline code</th>
-                  <th>Global</th>
-                  <th>Unique</th>
-                </tr>
-              </thead>
+      <ul id="adminList">Admin</ul>
 
-              <tbody>
-                <tr>
-                  <td>Script: </td>
-                  <td><code>long list of scripts to display here...</code></td>
-                  <td>[G]</td>
-                  <td>[U]</td>
-                </tr>
-              </tbody>
-            </table>
+      <ul id="linksList" style="display: inline-block; width:500px; border:1px solid blue; vertical-align: top">
+        <span id="linksCount"></span> Links
+      </ul>
 
-          </div>
-        </div>
-      </div><!-- // End .wrap-collapsible loop for data returned -->
+      <ul id="scriptsList" style="display: inline-block; width:500px;border:1px solid green; vertical-align: top; margin-left:50px;">
+        <span id="scriptsCount"></span> Scripts
+      </ul>
 
-    </div><!-- // End .container -->
   </body>
 </html>
