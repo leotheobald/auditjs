@@ -6,9 +6,12 @@
     <script type="text/javascript">
     'use strict';
 
+    // lets create a new app called api you could call it bob
     let api = {
+      // api.config is a simple map to the html id
       config: {
         urlId: 'url',
+        urlPlusId: 'urlPlus',
         limitId: 'limit',
         adminId: 'adminList',
         linksId: 'linksList',
@@ -17,18 +20,21 @@
         scriptsCountId: 'scriptsCount'
       },
       buildUrl: () => {
+        // read the html input fields and return a url to scrape
         let url =  api.getFormValue(api.config.urlId);
+        url +=  api.getFormValue(api.config.urlPlusId); // we add the plus input to the url
         let limit =  api.getFormValue(api.config.limitId);
         let urlOut = 'http://localhost:8082/getData/?url=' + url + '&limit=' + limit;
         return urlOut;
       },
       getFormValue: (id) => {
+        // simply gets an input value
         return document.getElementById(id).value;
       },
       getPageData: () => {
 
           let url =  api.buildUrl();
-          api.addMessage(api.config.adminId, 'Ajax request sent to : ' + url);
+          api.addMessages(api.config.adminId, ['Ajax request sent to : ' + url]);
           axios({
             method:'get',
             url: url,
@@ -36,38 +42,47 @@
           })
           .then(function (response) {
             if(response.status === 200){
-              let links = response.data.links;
-              let scripts = response.data.scripts;
+              let links = response.data.links; // array
+              let scripts = response.data.scripts; // array
+              let adminMsg = ['Ajax response links=' + links.length + ' scripts=' + scripts.length];
 
-              api.addMessage(api.config.adminId, 'Ajax response links=' + links.length + ' scripts=' + scripts.length);
-              api.addMessages(api.config.scriptsId, scripts);
-              api.addMessages(api.config.linksId, links);
-              
+              api.addMessages(api.config.adminId, adminMsg, false);
+              api.addMessages(api.config.linksId, links, true); // will add a link
+              api.addMessages(api.config.scriptsId, scripts, false);
+
+
               document.getElementById(api.config.linksCountId).innerHTML = links.length;
               document.getElementById(api.config.scriptsCountId).innerHTML = scripts.length;
 
             } else {
-              api.addMessage(api.config.adminId, 'Ajax response Error: ' + response.status);
+              api.addMessages(api.config.adminId, ['Ajax response Error: ' + response.status]);
             }
           })
           .catch(function (error) {
-              api.addMessage(api.config.adminId, 'Ajax response catch Error: ' + error);
+              api.addMessages(api.config.adminId, ['Ajax response catch Error: ' + error]);
           });
       },
-      addMessages: (id, messages) => {
+      addMessages: (id, messages, link = false) => {
         for(var i = 0; i < messages.length; i++) {
-          api.addMessage(id, messages[i]);
+          if(link) {
+            let msg =  messages[i];
+            messages[i] = '<a onClick="api.updateUrlPlus(this.innerHTML)" href="#">' + msg + '</a>';
+          }
+          document.getElementById(id).innerHTML += '<li>' + messages[i] +'</li>';
         }
       },
-      addMessage: (id, message) => {
-        document.getElementById(id).innerHTML += '<li>' + message +'</li>';
+      updateUrlPlus: (urlPlus) => {
+        // callback to add the clicked item to the url plus input and search new page
+        console.log('urlPlus', urlPlus);
+        document.getElementById(api.config.urlPlusId).value = urlPlus;
       }
     };
     </script>
   </head>
   <body style="font-family: Verdana;">
-      <input id="url" style="width:500px" value="https://www.w3schools.com/" type="text">
-      <input id="limit" value="3" type="number">
+      <input id="url" style="width:250px" value="https://www.w3schools.com" type="text">
+      <input id="urlPlus" style="width:150px" value="" type="text">
+      <input id="limit" style="width:30px" value="3" type="number">
 
       <input type="button" onClick="api.getPageData()" value="getPageData">
 
