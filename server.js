@@ -1,16 +1,21 @@
 /*
 A complete single server solution
-Its a single REST server that delivers the index.html and any json
+Its a single REST server that delivers the index.html etc and any json
 
 All output including index.html is sent from the REST server on 8082
-the rest server output depends on the request url.
+the rest server output depends on the request url, sometimes it sens json, sometimes html or css.
 if the request url is /getData you get json, if it is empty you get index.html
-$ node server.js
+npm install
+node server.js
 
 If you visit http://localhost:8082/ without any /pramaters you get index.html like before.
-If click a button on the index page you will make an ajax call to the same server which returns json.
+If click getPageData button you will make an ajax call which returns json.
+if the reuest was for the css/styles.css file it responds as css
 
+Sorry i made js6, cannot think js5 anymore.
 
+This is the rest server tht responds to a url.
+we send data back to the client, it could be html, css or json
 */
 
 const fs = require('fs');
@@ -57,22 +62,22 @@ app.get('/css/styles.css', function (req, res) {
 app.get('/getData', function (req, res) {
 
   const url = req.query.url;  // get the ?url= you sent in
-  const limit = req.query.limit; // get the ?limit= you sent in (not used right now)
-  console.log('server Recieved: query=', req.query);
-  // send an error if the params are missing
+  const limit = req.query.limit; // get the &limit= you sent in (not used right now)
+  console.log('server getData Recieved: query=', req.query);
+
+  // quit and send an error if the required params are missing
   if(!url || !limit) {
-    const out = {links:[], scripts: [], css: [], errors:['bad request']}
     console.log('Error: query=', req.query);
+    const out = {links:[], scripts: [], css: [], errors:['bad request', url, limit]};
     res.end(JSON.stringify(out));
   }
+  // params are good, continue...
 
-  // pass res in so we can res.end and send the data after async call to the page
+  // pass res in so we can do a res.end() and send the data after the async call to the page
   api.getPage(url, limit, res);
-   //res.end(JSON.stringify(out)); // not deeded anymore we call it after the async call
+   //res.end(JSON.stringify(out)); // not deeded anymore we call itn getPage() after the async call response
 });
-
-// this is the programme, i called it api because i can!
-// the above just responds to a url, the REST server, this is the api does the donkey work
+// the above just responds to a /getData url, it uses the api to do the donkey work
 //
 let api = {
   getPage: (url, limit, res) => {
