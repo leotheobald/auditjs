@@ -102,9 +102,6 @@ let api = {
      }
     });
   },
-  buildResponse: () => {
-
-  },
   getLinks: ($) => {
     const relativeLinks = $("a[href^='/']");
     let out = [];
