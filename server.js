@@ -46,26 +46,34 @@ app.get('/', function (req, res) {
   res.header("Content-Type", "text/html; charset=utf-8");
   res.end(html);
 });
+// this is why css failed, it was sending content-type as html, we now respond with css for this url
 app.get('/css/styles.css', function (req, res) {
   const html = fs.readFileSync('./css/styles.css');
   res.header("Content-Type", "text/css; charset=utf-8");
-  console.log('styles');
   res.end(html);
 });
 
-// will respond to any request to http://localhost:PORT/getData?url=https://www.ibm.com&limit=3
+// will respond to any request to http://localhost:PORT/getData
 app.get('/getData', function (req, res) {
 
-  const url = req.query.url;
-  const limit = req.query.limit;
+  const url = req.query.url;  // get the ?url= you sent in
+  const limit = req.query.limit; // get the ?limit= you sent in (not used right now)
   console.log('server Recieved: query=', req.query);
-  // TODO check they re valid!
+  // send an error if the params are missing
+  if(!url || !limit) {
+    const out = {links:[], scripts: [], css: [], errors:['bad request']}
+    console.log('Error: query=', req.query);
+    res.end(JSON.stringify(out));
+  }
 
   // pass res in so we can res.end and send the data after async call to the page
   api.getPage(url, limit, res);
    //res.end(JSON.stringify(out)); // not deeded anymore we call it after the async call
 });
 
+// this is the programme, i called it api because i can!
+// the above just responds to a url, the REST server, this is the api does the donkey work
+//
 let api = {
   getPage: (url, limit, res) => {
     request(url, function(error, response, body) {
@@ -73,39 +81,54 @@ let api = {
        const $ = cheerio.load(body);
        let links = api.getLinks($);
        let scripts = api.getScripts($);
-       let out = {links: links, scripts: scripts, errors: []};
-       console.log('OK 200: sending: links=', links.length + ' scripts=' + scripts.length);
+       let css = api.getCss($);
+       let out = {links: links, scripts: scripts, css: css, errors: []};
+       console.log('OK 200: sending:', out );
        res.end(JSON.stringify(out));
      } else {
        console.log('getPage Error not 200', error);
        let response = {
          errors: [error, url, 'api.getpage'],
          links: [],
-         scripts: []
+         scripts: [],
+         css: []
        };
        res.end(JSON.stringify(response));
      }
     });
   },
+  buildResponse: () => {
+
+  },
   getLinks: ($) => {
     const relativeLinks = $("a[href^='/']");
-    let pagesToVisit = [];
+    let out = [];
     relativeLinks.each(function() {
       //console.log("Links: " + "\n" + $(this).attr('href'));
-      pagesToVisit.push($(this).attr('href'));
+      out.push($(this).attr('href'));
     });
-    return pagesToVisit;
+    return out;
   },
   getScripts: ($) => {
     const scripts =  $("script");
-    let scriptLinks = [];
+    let out = [];
     scripts.each(function() {
       if($(this).attr('src')) {
-        scriptLinks.push($(this).attr('src'));
+        out.push($(this).attr('src'));
       } else {
-        scriptLinks.push('inline script: ' + $(this).toString().length + ' chars');
+        out.push('inline script: ' + $(this).toString().length + ' chars');
       }
     });
-    return scriptLinks;
+    return out;
+  },
+  getCss: ($) => {
+    const css =  $("link");
+    let out = [];
+    css.each(function() {
+      if($(this).attr('href')) {
+        out.push($(this).attr('href'));
+      }
+    });
+    return out;
   }
 };
