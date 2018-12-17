@@ -13,9 +13,6 @@ If click getPageData button you will make an ajax call which returns json.
 if the reuest was for the css/styles.css file it responds as css
 
 Sorry i made js6, cannot think js5 anymore.
-
-This is the rest server tht responds to a url.
-we send data back to the client, it could be html, css or json
 */
 
 const fs = require('fs');
@@ -87,6 +84,7 @@ let api = {
        let links = api.getLinks($);
        let scripts = api.getScripts($);
        let css = api.getCss($);
+
        let out = {links: links, scripts: scripts, css: css, errors: []};
        console.log('OK 200: sending:', out );
        res.end(JSON.stringify(out));
