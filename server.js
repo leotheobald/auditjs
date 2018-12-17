@@ -1,16 +1,18 @@
 /*
 A complete single server solution
-Its a single REST server that delivers the index.html and any json
+Its a single REST server that delivers the index.html etc and any json
 
 All output including index.html is sent from the REST server on 8082
-the rest server output depends on the request url.
+the rest server output depends on the request url, sometimes it sens json, sometimes html or css.
 if the request url is /getData you get json, if it is empty you get index.html
-$ node server.js
+npm install
+node server.js
 
 If you visit http://localhost:8082/ without any /pramaters you get index.html like before.
-If click a button on the index page you will make an ajax call to the same server which returns json.
+If click getPageData button you will make an ajax call which returns json.
+if the reuest was for the css/styles.css file it responds as css
 
-
+Sorry i made js6, cannot think js5 anymore.
 */
 
 const fs = require('fs');
@@ -46,26 +48,34 @@ app.get('/', function (req, res) {
   res.header("Content-Type", "text/html; charset=utf-8");
   res.end(html);
 });
+// this is why css failed, it was sending content-type as html, we now respond with css for this url
 app.get('/css/styles.css', function (req, res) {
   const html = fs.readFileSync('./css/styles.css');
   res.header("Content-Type", "text/css; charset=utf-8");
-  console.log('styles');
   res.end(html);
 });
 
-// will respond to any request to http://localhost:PORT/getData?url=https://www.ibm.com&limit=3
+// will respond to any request to http://localhost:PORT/getData
 app.get('/getData', function (req, res) {
 
-  const url = req.query.url;
-  const limit = req.query.limit;
-  console.log('server Recieved: query=', req.query);
-  // TODO check they re valid!
+  const url = req.query.url;  // get the ?url= you sent in
+  const limit = req.query.limit; // get the &limit= you sent in (not used right now)
+  console.log('server getData Recieved: query=', req.query);
 
-  // pass res in so we can res.end and send the data after async call to the page
+  // quit and send an error if the required params are missing
+  if(!url || !limit) {
+    console.log('Error: query=', req.query);
+    const out = {links:[], scripts: [], css: [], errors:['bad request', url, limit]};
+    res.end(JSON.stringify(out));
+  }
+  // params are good, continue...
+
+  // pass res in so we can do a res.end() and send the data after the async call to the page
   api.getPage(url, limit, res);
-   //res.end(JSON.stringify(out)); // not deeded anymore we call it after the async call
+   //res.end(JSON.stringify(out)); // not deeded anymore we call itn getPage() after the async call response
 });
-
+// the above just responds to a /getData url, it uses the api to do the donkey work
+//
 let api = {
   getPage: (url, limit, res) => {
     request(url, function(error, response, body) {
@@ -73,15 +83,18 @@ let api = {
        const $ = cheerio.load(body);
        let links = api.getLinks($);
        let scripts = api.getScripts($);
-       let out = {links: links, scripts: scripts, errors: []};
-       console.log('OK 200: sending: links=', links.length + ' scripts=' + scripts.length);
+       let css = api.getCss($);
+
+       let out = {links: links, scripts: scripts, css: css, errors: []};
+       console.log('OK 200: sending:', out );
        res.end(JSON.stringify(out));
      } else {
        console.log('getPage Error not 200', error);
        let response = {
          errors: [error, url, 'api.getpage'],
          links: [],
-         scripts: []
+         scripts: [],
+         css: []
        };
        res.end(JSON.stringify(response));
      }
@@ -89,26 +102,34 @@ let api = {
   },
   getLinks: ($) => {
     const relativeLinks = $("a[href^='/']");
-    let pagesToVisit = [];
+    let out = [];
     relativeLinks.each(function() {
       //console.log("Links: " + "\n" + $(this).attr('href'));
-      pagesToVisit.push($(this).attr('href'));
+      out.push($(this).attr('href'));
     });
-    return pagesToVisit;
+    return out;
   },
   getScripts: ($) => {
     const scripts =  $("script");
-    let scriptLinks = [];
+    let out = [];
     scripts.each(function() {
       if($(this).attr('src')) {
-        scriptLinks.push($(this).attr('src'));
+        out.push($(this).attr('src'));
       } else {
-        //scriptLinks.push('inline script: ' + $(this).toString().length + ' chars');
-        scriptLinks.push('inline script: ' + $(this).toString().length + ' chars' + $(this));
+        out.push('inline script: ' + $(this).toString().length + ' chars' + '\n' + $(this));
       }
     });
-
     console.log("test inline: ", scripts);
-    return scriptLinks;
+    return out;
+  },
+  getCss: ($) => {
+    const css =  $("link");
+    let out = [];
+    css.each(function() {
+      if($(this).attr('href')) {
+        out.push($(this).attr('href'));
+      }
+    });
+    return out;
   }
 };

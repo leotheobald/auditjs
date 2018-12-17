@@ -16,16 +16,18 @@
         limitId: 'limit',
         adminId: 'adminList',
         linksId: 'linksList',
-        scriptsId: 'scriptsList',
         linksCountId: 'linksCount',
-        scriptsCountId: 'scriptsCount'
+        scriptsId: 'scriptsList',
+        scriptsCountId: 'scriptsCount',
+        cssId: 'cssList',
+        cssCountId: 'cssCount'
       },
       buildUrl: () => {
-        // read the html input fields and return a url to scrape
+        // read the html input fields and return as a url to scrape
         let url =  api.getFormValue(api.config.urlId);
         url +=  api.getFormValue(api.config.urlPlusId); // we add the plus input to the url
         let limit =  api.getFormValue(api.config.limitId);
-        let urlOut = 'http://localhost:8082/getData/?url=' + url + '&limit=' + limit;
+        let urlOut = 'http://localhost:8082/getData/?url=' + url + '&limit=' + limit; // yes hard coded but hey
         return urlOut;
       },
       getFormValue: (id) => {
@@ -33,55 +35,76 @@
         return document.getElementById(id).value;
       },
       getPageData: () => {
+        console.log('getPageData called');
+        // emty the html lists
+        api.clearLists();
+        let url =  api.buildUrl(); // get the input fields of interest and return as a full domain/querystring
 
-          let url =  api.buildUrl();
-          api.addMessages(api.config.adminId, ['Ajax request sent to : ' + url]);
-          axios({
-            method:'get',
-            url: url,
-            responseType:'json'
-          })
-          .then(function (response) {
-            if(response.status === 200){
-              let links = response.data.links; // array
-              let scripts = response.data.scripts; // array
-              let scriptsInline = response.data;
-              let adminMsg = ['Ajax response links=' + links.length + ' scripts=' + scripts.length];
+        // empty all lists content
+        api.addMessages(api.config.adminId, 'Ajax request sent to : ' + url);
 
-              api.addMessages(api.config.adminId, adminMsg, false);
-              api.addMessages(api.config.linksId, links, true); // will add a link
-              api.addMessages(api.config.scriptsId, scripts, false);
+        axios({
+          method:'get',
+          url: url,
+          responseType:'json'
+        })
+        .then(function (response) {
+          if(response.status === 200){
+            // the response always sends these arrays even if an error occured
+            let links = response.data.links;
+            let scripts = response.data.scripts;
+            let css = response.data.css;
+            let errors = response.data.errors;
 
-              document.getElementById(api.config.linksCountId).innerHTML = links.length;
-              document.getElementById(api.config.scriptsCountId).innerHTML = scripts.length;
-              console.log("from leo: ", response.data);
+            let adminMsg = 'Ajax response links=' + links.length + ' scripts=' + scripts.length + ' css=' + css.length + ' errors=' + errors.length;
 
-            } else {
-              api.addMessages(api.config.adminId, ['Ajax response Error: ' + response.status]);
-            }
-          })
-          .catch(function (error) {
-              api.addMessages(api.config.adminId, ['Ajax response catch Error: ' + error]);
-          });
+            api.addMessages(api.config.adminId, adminMsg, false);
+            api.addMessages(api.config.linksId, links, true); // will add a link
+            api.addMessages(api.config.scriptsId, scripts, false);
+            api.addMessages(api.config.cssId, css, false);
+
+            document.getElementById(api.config.linksCountId).innerHTML = links.length;
+            document.getElementById(api.config.scriptsCountId).innerHTML = scripts.length;
+            document.getElementById(api.config.cssCountId).innerHTML = css.length;
+
+            console.log("from leo: ", response.data);
+
+          } else {
+            api.addMessages(api.config.adminId, 'Ajax response Error: ' + response.status);
+          }
+        })
+        .catch(function (error) {
+            api.addMessages(api.config.adminId, 'Ajax response catch Error: ' + error);
+        });
       },
       addMessages: (id, messages, link = false) => {
-        for(var i = 0; i < messages.length; i++) {
-          if(link) {
-            let msg =  messages[i];
-            messages[i] = '<a onClick="api.updateUrlPlus(this.innerHTML)" href="#">' + msg + '</a>';
+        if(typeof messages  === 'string') {
+          messages = [messages]; // you can send in messages as string or an array, always convert to an array.
+        }
+        for(let i = 0; i < messages.length; i++) {
+          if(link) { // add a link flag was true, add to the html.
+            messages[i] = '<a onClick="api.updateUrlPlus(this.innerHTML)" href="#">' + messages[i] + '</a>';
           }
           document.getElementById(id).innerHTML += '<li>' + messages[i] +'</li>';
         }
       },
       updateUrlPlus: (urlPlus) => {
-        // callback to add the clicked item to the url plus input and search new page
-        console.log('urlPlus', urlPlus);
+        // you clicked a link, update the form field
         document.getElementById(api.config.urlPlusId).value = urlPlus;
+        // re run the script with the new form values
+        api.getPageData();
+      },
+      clearLists: () => {
+        const listsToClear = ['linksId', 'scriptsId', 'cssId'];
+        for(let i = 0; i < listsToClear.length; i++) {
+          // this is how to address a property using a variable
+          document.getElementById(api.config[listsToClear[i]]).innerHTML = '';
+        }
       }
     };
     </script>
   </head>
-  <body style="font-family: Verdana;">
+  <body>
       <input id="url" style="width:250px" value="https://www.w3schools.com" type="text">
       <input id="urlPlus" style="width:150px" value="" type="text">
       <input id="limit" style="width:30px" value="1" type="number">
@@ -90,12 +113,22 @@
 
       <ul id="adminList">Admin</ul>
 
-      <ul id="linksList" style="display: inline-block; width:500px; border:1px solid blue; vertical-align: top">
+
+      <ul style="display: inline-block; width:300px; border:1px solid blue; vertical-align: top">
         <span id="linksCount"></span> Links
+        <span id="linksList"></span>
       </ul>
 
-      <ul id="scriptsList" style="display: inline-block; width:500px;border:1px solid green; vertical-align: top; margin-left:50px;">
+
+      <ul style="display: inline-block; width:300px; border:1px solid red; vertical-align: top">
+        <span id="cssCount"></span> Css
+        <span id="cssList"></span>
+      </ul>
+
+
+      <ul style="display: inline-block; width:300px;border:1px solid green; vertical-align: top; margin-left:50px;">
         <span id="scriptsCount"></span> Scripts
+        <span id="scriptsList"></span>
       </ul>
 
   </body>
