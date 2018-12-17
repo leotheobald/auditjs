@@ -18,6 +18,7 @@
         linksId: 'linksList',
         linksCountId: 'linksCount',
         scriptsId: 'scriptsList',
+        //scriptsInline: 'inlineScripts',
         scriptsCountId: 'scriptsCount',
         cssId: 'cssList',
         cssCountId: 'cssCount'
@@ -66,8 +67,9 @@
             document.getElementById(api.config.linksCountId).innerHTML = links.length;
             document.getElementById(api.config.scriptsCountId).innerHTML = scripts.length;
             document.getElementById(api.config.cssCountId).innerHTML = css.length;
+            //document.getElementById(api.config.scriptsInline).innerHTML = scripts;
 
-            console.log("from leo: ", response.data);
+            console.log("from leo: ", scripts);
 
           } else {
             api.addMessages(api.config.adminId, 'Ajax response Error: ' + response.status);
@@ -105,31 +107,46 @@
     </script>
   </head>
   <body>
-      <input id="url" style="width:250px" value="https://www.w3schools.com" type="text">
-      <input id="urlPlus" style="width:150px" value="" type="text">
-      <input id="limit" style="width:30px" value="1" type="number">
+    <div class="container" style="width: 960px; margin: 0 auto;">
+      <div class="collectFormData">
+        <label for="url">URL</label>
+        <input id="url" name="url" style="width:250px" value="https://denofgeekus.vm.didev.co.uk" type="text">
+        <label for="urlPlus">URL Plus</label>
+        <input id="urlPlus" name="urlPlus" style="width:150px" value="/us" type="text">
+        <label for="limit"></label>
+        <input id="limit" hidden name="limit" style="width:30px" value="1" type="number">
 
-      <input type="button" onClick="api.getPageData()" value="getPageData">
+        <input type="button" onClick="api.getPageData()" value="Get Page Data">
+      </div>
 
       <ul id="adminList">Admin</ul>
 
+      <!-- ADD HTML TO SHOW PRETTY OUTPUT -->
+      <!-- Begin .wrap-collapsible loop for data returned -->
+      <div class="wrap-collabsible">
+        <input id="collapsible" class="toggle" type="checkbox">
+        <label for="collapsible" class="lbl-toggle" tabindex="0"><span id="scriptsCount"></span> <span>Scripts</span></label>
+        <div class="collapsible-content">
+          <div class="content-inner">
+            <p>
+              Below is a list of scripts inline and from source, listed as they are loaded into this page.
+            </p>
+            <ul id="scriptsList"></ul>
+          </div>
+        </div>
+      </div><!-- // End .wrap-collapsible loop for data returned -->
 
-      <ul style="display: inline-block; width:300px; border:1px solid blue; vertical-align: top">
+      <ul style="width: 100%; border:1px solid blue; vertical-align: top">
         <span id="linksCount"></span> Links
         <span id="linksList"></span>
       </ul>
 
-
-      <ul style="display: inline-block; width:300px; border:1px solid red; vertical-align: top">
+      <ul style="width: 100%; border:1px solid red; vertical-align: top">
         <span id="cssCount"></span> Css
         <span id="cssList"></span>
       </ul>
 
-
-      <ul style="display: inline-block; width:300px;border:1px solid green; vertical-align: top; margin-left:50px;">
-        <span id="scriptsCount"></span> Scripts
-        <span id="scriptsList"></span>
-      </ul>
+    </div><!-- /// end .container -->
 
   </body>
 </html>

@@ -11,7 +11,13 @@
   width: 80%;
   margin: 0 auto;
 }
-
+#scriptsList li code script {
+  display: block;
+  word-wrap: break-word;
+}
+#scriptsList li {
+  padding: 5px 0;
+}
 .container h1,
 .container form {
   font-family: var(--fonts-text);
@@ -78,7 +84,7 @@ input[type='checkbox'] {
 }
 
 .toggle:checked + .lbl-toggle + .collapsible-content {
-  max-height: 350px;
+  max-height: 100%;
 }
 
 .toggle:checked + .lbl-toggle {

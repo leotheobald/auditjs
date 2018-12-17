@@ -3,16 +3,15 @@ A complete single server solution
 Its a single REST server that delivers the index.html etc and any json
 
 All output including index.html is sent from the REST server on 8082
-the rest server output depends on the request url, sometimes it sens json, sometimes html or css.
+the rest server output depends on the request url, sometimes it sends json, sometimes html or css.
 if the request url is /getData you get json, if it is empty you get index.html
 npm install
 node server.js
 
 If you visit http://localhost:8082/ without any /pramaters you get index.html like before.
 If click getPageData button you will make an ajax call which returns json.
-if the reuest was for the css/styles.css file it responds as css
+if the request was for the css/styles.css file it responds as css
 
-Sorry i made js6, cannot think js5 anymore.
 */
 
 const fs = require('fs');
@@ -65,7 +64,7 @@ app.get('/getData', function (req, res) {
   // quit and send an error if the required params are missing
   if(!url || !limit) {
     console.log('Error: query=', req.query);
-    const out = {links:[], scripts: [], css: [], errors:['bad request', url, limit]};
+    const out = {links: [], scripts: [], css: [], errors:['bad request', url, limit]};
     res.end(JSON.stringify(out));
   }
   // params are good, continue...
@@ -104,22 +103,21 @@ let api = {
     const relativeLinks = $("a[href^='/']");
     let out = [];
     relativeLinks.each(function() {
-      //console.log("Links: " + "\n" + $(this).attr('href'));
       out.push($(this).attr('href'));
     });
     return out;
   },
   getScripts: ($) => {
     const scripts =  $("script");
+    const scriptsInline =  $("script");
     let out = [];
     scripts.each(function() {
       if($(this).attr('src')) {
         out.push($(this).attr('src'));
       } else {
-        out.push('inline script: ' + $(this).toString().length + ' chars' + '\n' + $(this));
+        out.push('inline script: ' + $(this).toString().length + ' chars' + '\n' + '<code>' + $(this).toString() + '</code>');
       }
     });
-    console.log("test inline: ", scripts);
     return out;
   },
   getCss: ($) => {
