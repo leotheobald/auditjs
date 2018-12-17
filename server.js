@@ -103,9 +103,12 @@ let api = {
       if($(this).attr('src')) {
         scriptLinks.push($(this).attr('src'));
       } else {
-        scriptLinks.push('inline script: ' + $(this).toString().length + ' chars');
+        //scriptLinks.push('inline script: ' + $(this).toString().length + ' chars');
+        scriptLinks.push('inline script: ' + $(this).toString().length + ' chars' + $(this));
       }
     });
+
+    console.log("test inline: ", scripts);
     return scriptLinks;
   }
 };

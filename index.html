@@ -45,6 +45,7 @@
             if(response.status === 200){
               let links = response.data.links; // array
               let scripts = response.data.scripts; // array
+              let scriptsInline = response.data;
               let adminMsg = ['Ajax response links=' + links.length + ' scripts=' + scripts.length];
 
               api.addMessages(api.config.adminId, adminMsg, false);
@@ -53,6 +54,7 @@
 
               document.getElementById(api.config.linksCountId).innerHTML = links.length;
               document.getElementById(api.config.scriptsCountId).innerHTML = scripts.length;
+              console.log("from leo: ", response.data);
 
             } else {
               api.addMessages(api.config.adminId, ['Ajax response Error: ' + response.status]);
@@ -82,7 +84,7 @@
   <body style="font-family: Verdana;">
       <input id="url" style="width:250px" value="https://www.w3schools.com" type="text">
       <input id="urlPlus" style="width:150px" value="" type="text">
-      <input id="limit" style="width:30px" value="3" type="number">
+      <input id="limit" style="width:30px" value="1" type="number">
 
       <input type="button" onClick="api.getPageData()" value="getPageData">
 
