@@ -64,7 +64,7 @@ app.get('/getData', function (req, res) {
   // quit and send an error if the required params are missing
   if(!url || !limit) {
     console.log('Error: query=', req.query);
-    const out = {links: [], scripts: [], css: [], errors:['bad request', url, limit]};
+    const out = {links: [], scripts: [], css: [], Iframes: [], errors:['bad request', url, limit]};
     res.end(JSON.stringify(out));
   }
   // params are good, continue...
@@ -83,6 +83,7 @@ let api = {
        let links = api.getLinks($);
        let scripts = api.getScripts($);
        let css = api.getCss($);
+       let Iframes = api.getIframe($);
 
        let out = {links: links, scripts: scripts, css: css, errors: []};
        console.log('OK 200: sending:', out );
@@ -93,7 +94,8 @@ let api = {
          errors: [error, url, 'api.getpage'],
          links: [],
          scripts: [],
-         css: []
+         css: [],
+         Iframes: []
        };
        res.end(JSON.stringify(response));
      }
@@ -109,7 +111,6 @@ let api = {
   },
   getScripts: ($) => {
     const scripts =  $("script");
-    const scriptsInline =  $("script");
     let out = [];
     scripts.each(function() {
       if($(this).attr('src')) {
@@ -126,6 +127,16 @@ let api = {
     css.each(function() {
       if($(this).attr('href')) {
         out.push($(this).attr('href'));
+      }
+    });
+    return out;
+  },
+  getIframe: ($) => {
+    const Iframes =  $("iframe");
+    let out = [];
+    Iframes.each(function() {
+      if($(this).attr('src')) {
+        out.push('Iframes: ' + $(this).toString().length + ' chars');
       }
     });
     return out;

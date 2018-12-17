@@ -15,13 +15,15 @@
         urlPlusId: 'urlPlus',
         limitId: 'limit',
         adminId: 'adminList',
+        adminDisplayUrl: 'urlCrawled',
         linksId: 'linksList',
         linksCountId: 'linksCount',
         scriptsId: 'scriptsList',
-        //scriptsInline: 'inlineScripts',
         scriptsCountId: 'scriptsCount',
         cssId: 'cssList',
-        cssCountId: 'cssCount'
+        cssCountId: 'cssCount',
+        iframesId: 'iframesList',
+        iframesCountId: 'iframesCount'
       },
       buildUrl: () => {
         // read the html input fields and return as a url to scrape
@@ -43,6 +45,7 @@
 
         // empty all lists content
         api.addMessages(api.config.adminId, 'Ajax request sent to : ' + url);
+        api.addMessages(api.config.adminDisplayUrl, api.getFormValue(api.config.urlId) + api.getFormValue(api.config.urlPlusId));
 
         axios({
           method:'get',
@@ -55,21 +58,21 @@
             let links = response.data.links;
             let scripts = response.data.scripts;
             let css = response.data.css;
+            let iFrames = response.data.Iframes;
             let errors = response.data.errors;
 
-            let adminMsg = 'Ajax response links=' + links.length + ' scripts=' + scripts.length + ' css=' + css.length + ' errors=' + errors.length;
+            let adminMsg = 'Ajax response links=' + links.length + ' scripts: ' + scripts.length + ' css: ' + css.length + 'iframes: ' + iFrames.length + ' errors: ' + errors.length;
 
             api.addMessages(api.config.adminId, adminMsg, false);
             api.addMessages(api.config.linksId, links, true); // will add a link
             api.addMessages(api.config.scriptsId, scripts, false);
             api.addMessages(api.config.cssId, css, false);
+            api.addMessages(api.config.iframesId, iFrames, false);
 
             document.getElementById(api.config.linksCountId).innerHTML = links.length;
             document.getElementById(api.config.scriptsCountId).innerHTML = scripts.length;
             document.getElementById(api.config.cssCountId).innerHTML = css.length;
-            //document.getElementById(api.config.scriptsInline).innerHTML = scripts;
-
-            console.log("from leo: ", scripts);
+            document.getElementById(api.config.iframesCountId).innerHTML = iFrames.length;
 
           } else {
             api.addMessages(api.config.adminId, 'Ajax response Error: ' + response.status);
@@ -97,7 +100,7 @@
         api.getPageData();
       },
       clearLists: () => {
-        const listsToClear = ['linksId', 'scriptsId', 'cssId'];
+        const listsToClear = ['linksId', 'scriptsId', 'cssId', 'iframesId'];
         for(let i = 0; i < listsToClear.length; i++) {
           // this is how to address a property using a variable
           document.getElementById(api.config[listsToClear[i]]).innerHTML = '';
@@ -125,7 +128,9 @@
       <!-- Begin .wrap-collapsible loop for data returned -->
       <div class="wrap-collabsible">
         <input id="collapsible" class="toggle" type="checkbox">
-        <label for="collapsible" class="lbl-toggle" tabindex="0"><span id="scriptsCount"></span> <span>Scripts</span></label>
+        <label for="collapsible" class="lbl-toggle" tabindex="0">
+          <span id="scriptsCount"></span> <span>Scripts</span> <span id="urlCrawled"></span>
+        </label>
         <div class="collapsible-content">
           <div class="content-inner">
             <p>
@@ -144,6 +149,11 @@
       <ul style="width: 100%; border:1px solid red; vertical-align: top">
         <span id="cssCount"></span> Css
         <span id="cssList"></span>
+      </ul>
+
+      <ul style="width: 100%; border:1px solid orange; vertical-align: top">
+        <span id="iframesCount"></span> IFrames
+        <span id="iframesList"></span>
       </ul>
 
     </div><!-- /// end .container -->
